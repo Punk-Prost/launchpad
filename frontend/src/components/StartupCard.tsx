@@ -1,0 +1,3 @@
+import {Link} from 'react-router-dom';import {ArrowUpRight,Users} from 'lucide-react';import type {Startup} from '../types';
+const stages={idea:'Идея',prototype:'Прототип',mvp:'MVP',growth:'Рост'};
+export default function StartupCard({item}: {item:Startup}){return <article className="card"><div className="cardTop"><span className="tag">{item.industry}</span><Link aria-label={`Открыть ${item.name}`} to={`/startups/${item.slug}`}><ArrowUpRight/></Link></div><div><h3>{item.name}</h3><p className="tagline">{item.tagline}</p><p>{item.description}</p></div><div className="cardMeta"><span>{stages[item.stage]}</span><span><Users size={15}/>{item.team_size}</span></div><div className="progress"><i style={{width:`${item.progress}%`}}/></div></article>}

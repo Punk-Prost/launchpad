@@ -1,0 +1,5 @@
+import type { Startup,User } from './types';
+const BASE=import.meta.env.VITE_API_URL||'/api';
+let controller:AbortController|null=null;
+async function request<T>(path:string,options:RequestInit={}):Promise<T>{controller?.abort();controller=new AbortController();const token=localStorage.getItem('token');const response=await fetch(`${BASE}${path}`,{...options,signal:controller.signal,headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{ }),...options.headers}});if(!response.ok)throw new Error((await response.json().catch(()=>({detail:'Ошибка сервера'}))).detail);return response.json()}
+export const api={startups:(query='')=>request<Startup[]>(`/startups${query}`),startup:(slug:string)=>request<Startup>(`/startups/${slug}`),login:(email:string,password:string)=>request<{access_token:string;user:User}>('/auth/login',{method:'POST',body:JSON.stringify({email,password})}),register:(body:unknown)=>request<{access_token:string;user:User}>('/auth/register',{method:'POST',body:JSON.stringify(body)}),apply:(id:number,message:string)=>request(`/startups/${id}/applications`,{method:'POST',body:JSON.stringify({message})})};
