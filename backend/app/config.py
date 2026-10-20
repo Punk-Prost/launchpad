@@ -1,5 +1,6 @@
 from pydantic import field_validator
 from pydantic_settings import BaseSettings,SettingsConfigDict
+from urllib.parse import parse_qsl,urlencode,urlsplit,urlunsplit
 class Settings(BaseSettings):
     database_url:str='sqlite:///./launchpad.db'
     jwt_secret:str='development-only-secret-change-me'
@@ -11,6 +12,10 @@ class Settings(BaseSettings):
     @classmethod
     def normalize_postgres_driver(cls,value:str):
         if value.startswith('postgresql://'):
-            return value.replace('postgresql://','postgresql+psycopg://',1)
+            value=value.replace('postgresql://','postgresql+psycopg://',1)
+        if value.startswith('postgresql+psycopg://'):
+            parts=urlsplit(value)
+            query=urlencode([(key,item) for key,item in parse_qsl(parts.query) if key!='pgbouncer'])
+            value=urlunsplit((parts.scheme,parts.netloc,parts.path,query,parts.fragment))
         return value
 settings=Settings()
